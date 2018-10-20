@@ -25,7 +25,7 @@ ap.add_argument("-r", "--recognizer", required=True,
 	help="path to model trained to recognize faces")
 ap.add_argument("-l", "--le", required=True,
 	help="path to label encoder")
-ap.add_argument("-c", "--confidence", type=float, default=0.5,
+ap.add_argument("-c", "--confidence", type=float, default=0.2,
 	help="minimum probability to filter weak detections")
 args = vars(ap.parse_args())
 
@@ -86,36 +86,10 @@ while True:
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 			(startX, startY, endX, endY) = box.astype("int")
 
-			# extract the face ROI
-			face = frame[startY:endY, startX:endX]
-			(fH, fW) = face.shape[:2]
-
-			# ensure the face width and height are sufficiently large
-			if fW < 20 or fH < 20:
-				continue
-
-			# construct a blob for the face ROI, then pass the blob
-			# through our face embedding model to obtain the 128-d
-			# quantification of the face
-			faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255,
-				(96, 96), (0, 0, 0), swapRB=True, crop=False)
-			embedder.setInput(faceBlob)
-			vec = embedder.forward()
-
-			# perform classification to recognize the face
-			preds = recognizer.predict_proba(vec)[0]
-			j = np.argmax(preds)
-			proba = preds[j]
-			name = le.classes_[j]
-
-			# draw the bounding box of the face along with the
-			# associated probability
-			text = "{}: {:.2f}%".format(name, proba * 100)
 			y = startY - 10 if startY - 10 > 10 else startY + 10
-			cv2.rectangle(frame, (startX, startY), (endX, endY),
-				(0, 0, 255), 2)
-			cv2.putText(frame, text, (startX, y),
-				cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
+			cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 0, 255), 2)
+			# cv2.putText(frame, text, (startX, y),
+			# 	cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 255), 2)
 
 	# update the FPS counter
 	fps.update()

@@ -63,6 +63,7 @@ ref.set({
 # start the FPS throughput estimator
 fps = FPS().start()
 
+
 # loop over frames from the video file stream
 while True:
 	counter = 0
@@ -114,7 +115,7 @@ while True:
 		'timestamp': str(datetime.datetime.now())
 	})
 	key = cv2.waitKey(1) & 0xFF
-	time.sleep(5.0)
+	time.sleep(2.5)
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break

@@ -7,6 +7,10 @@
 # import the necessary packages
 from imutils.video import VideoStream
 from imutils.video import FPS
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+import datetime
 import numpy as np
 import argparse
 import imutils
@@ -25,7 +29,7 @@ ap.add_argument("-r", "--recognizer", required=True,
 	help="path to model trained to recognize faces")
 ap.add_argument("-l", "--le", required=True,
 	help="path to label encoder")
-ap.add_argument("-c", "--confidence", type=float, default=0.2,
+ap.add_argument("-c", "--confidence", type=float, default=0.35,
 	help="minimum probability to filter weak detections")
 args = vars(ap.parse_args())
 
@@ -49,6 +53,13 @@ print("[INFO] starting video stream...")
 vs = VideoStream(src=0).start()
 time.sleep(2.0)
 
+cred = credentials.Certificate('lehigh-line-count-firebase-adminsdk-fl2v4-bad2be6139.json')
+app = firebase_admin.initialize_app(cred)
+ref = db.reference(path='/', app=None, url='https://lehigh-line-count.firebaseio.com/')
+ref.set({
+		'counter': '0',
+		'timestamp': str(datetime.datetime.now())
+})
 # start the FPS throughput estimator
 fps = FPS().start()
 
@@ -98,8 +109,12 @@ while True:
 	# show the output frame
 	cv2.imshow("Frame", frame)
 	print(counter)
+	ref.update({
+		'counter': counter,
+		'timestamp': str(datetime.datetime.now())
+	})
 	key = cv2.waitKey(1) & 0xFF
-
+	time.sleep(5.0)
 	# if the `q` key was pressed, break from the loop
 	if key == ord("q"):
 		break

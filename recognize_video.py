@@ -54,6 +54,7 @@ fps = FPS().start()
 
 # loop over frames from the video file stream
 while True:
+	counter = 0
 	# grab the frame from the threaded video stream
 	frame = vs.read()
 
@@ -85,7 +86,7 @@ while True:
 			# the face
 			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 			(startX, startY, endX, endY) = box.astype("int")
-
+			counter = counter + 1
 			y = startY - 10 if startY - 10 > 10 else startY + 10
 			cv2.rectangle(frame, (startX, startY), (endX, endY), (0, 0, 255), 2)
 			# cv2.putText(frame, text, (startX, y),
@@ -96,6 +97,7 @@ while True:
 
 	# show the output frame
 	cv2.imshow("Frame", frame)
+	print(counter)
 	key = cv2.waitKey(1) & 0xFF
 
 	# if the `q` key was pressed, break from the loop
@@ -106,6 +108,7 @@ while True:
 fps.stop()
 print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
 print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+
 
 # do a bit of cleanup
 cv2.destroyAllWindows()
